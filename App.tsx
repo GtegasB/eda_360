@@ -47,37 +47,37 @@ const createEmptyEntity = (): ComplementaryEntityInput => ({
 });
 
 const scoreTone = (score: number) => {
-  if (score >= 8) return 'text-emerald-600';
-  if (score >= 5) return 'text-amber-600';
-  return 'text-rose-600';
+  if (score >= 8) return 'text-rc-green';
+  if (score >= 5) return 'text-rc-amber';
+  return 'text-rc-red';
 };
 
 const actionTone = (action: string) => {
-  if (action === 'Fortalecer') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-  if (action === 'Ajustar') return 'bg-amber-50 text-amber-700 border-amber-200';
-  return 'bg-rose-50 text-rose-700 border-rose-200';
+  if (action === 'Fortalecer') return 'bg-green-50 text-rc-green border-green-200';
+  if (action === 'Ajustar') return 'bg-amber-50 text-rc-amber border-amber-200';
+  return 'bg-red-50 text-rc-red border-red-200';
 };
 
 function SystemSidebar({ active }: { active: 'form' | 'report' }) {
   return (
-    <aside className="bg-slate-900 text-white p-6 lg:p-5 lg:sticky lg:top-0 lg:h-screen overflow-auto">
+    <aside className="bg-rc-surface text-rc-text p-6 lg:p-5 lg:sticky lg:top-0 lg:h-screen overflow-auto border-r border-rc-line-soft">
       <div className="flex flex-col gap-1 mb-7">
         <strong className="text-xl font-bold tracking-tight">EDA360</strong>
-        <span className="text-xs text-slate-300 leading-relaxed">
+        <span className="text-xs text-rc-muted leading-relaxed font-semibold">
           Centro de Inteligencia Digital<br />
           Estrutura EDA
         </span>
       </div>
 
       <div className="grid gap-2 mb-6 text-sm">
-        <div className={`rounded-lg px-3 py-2 border ${active === 'form' ? 'bg-brand-600/20 border-brand-400/40' : 'bg-white/5 border-white/10'}`}>Nova analise</div>
-        <div className={`rounded-lg px-3 py-2 border ${active === 'report' ? 'bg-brand-600/20 border-brand-400/40' : 'bg-white/5 border-white/10'}`}>Relatorio</div>
-        <div className="rounded-lg px-3 py-2 bg-white/5 border border-white/10">Radar dos pilares</div>
-        <div className="rounded-lg px-3 py-2 bg-white/5 border border-white/10">Ecossistema visual</div>
-        <div className="rounded-lg px-3 py-2 bg-white/5 border border-white/10">Sessao estrategica</div>
+        <div className={`rounded-lg px-3 py-2 border font-semibold ${active === 'form' ? 'bg-brand-50 border-brand-300 text-brand-700' : 'bg-rc-surface3 border-rc-line text-rc-muted'}`}>Nova analise</div>
+        <div className={`rounded-lg px-3 py-2 border font-semibold ${active === 'report' ? 'bg-brand-50 border-brand-300 text-brand-700' : 'bg-rc-surface3 border-rc-line text-rc-muted'}`}>Relatorio</div>
+        <div className="rounded-lg px-3 py-2 bg-rc-surface3 border border-rc-line text-rc-muted font-semibold">Radar dos pilares</div>
+        <div className="rounded-lg px-3 py-2 bg-rc-surface3 border border-rc-line text-rc-muted font-semibold">Ecossistema visual</div>
+        <div className="rounded-lg px-3 py-2 bg-rc-surface3 border border-rc-line text-rc-muted font-semibold">Sessao estrategica</div>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-slate-300 leading-relaxed">
+      <div className="rounded-xl border border-rc-line bg-rc-surface3 p-4 text-xs text-rc-muted leading-relaxed">
         O EDA360 analisa empresa principal + ate 3 entidades complementares, organiza os 19 pilares da E.D.A e mostra
         como o ecossistema digital esta conectado.
       </div>
@@ -244,18 +244,18 @@ export default function App() {
   );
 
   const LandingView = () => (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_#d1fae5_0%,_#f8fafc_45%,_#ecfeff_100%)] p-6 md:p-10">
+    <div className="min-h-screen bg-rc-bg p-6 md:p-10">
       <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8 items-center min-h-[85vh]">
         <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-white shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rc-surface border border-rc-line shadow-[var(--shadow-soft)]">
             <Sparkles className="w-4 h-4 text-brand-600" />
-            <span className="text-xs font-semibold text-slate-700">Estrutura EDA</span>
+            <span className="text-xs font-bold text-rc-muted">Estrutura EDA</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-rc-text leading-tight">
             EDA360
             <span className="block text-brand-700 mt-1">Scanner estrategico de estrutura digital</span>
           </h1>
-          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-2xl">
+          <p className="text-rc-muted text-base md:text-lg leading-relaxed max-w-2xl font-medium">
             Produto de entrada do <strong>Centro de Inteligencia Digital</strong> para leitura inicial da maturidade digital
             e abertura para implantacao da metodologia <strong>E.D.A</strong>.
           </p>
@@ -270,14 +270,14 @@ export default function App() {
           </Button>
         </div>
 
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-[var(--shadow)] bg-rc-surface">
           <div className="flex items-start gap-4">
             <div className="w-14 h-14 bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl flex items-center justify-center text-white">
               <Radar className="w-7 h-7" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Leitura aplicada do scanner</h2>
-              <p className="text-sm text-slate-600 mt-1">Layout em formato de sistema com radar de pilares e mapa visual.</p>
+              <h2 className="text-xl font-extrabold text-rc-text">Leitura aplicada do scanner</h2>
+              <p className="text-sm text-rc-muted mt-1">Layout em formato de sistema com radar de pilares e mapa visual.</p>
             </div>
           </div>
         </Card>
@@ -286,13 +286,13 @@ export default function App() {
   );
 
   const FormView = () => (
-    <div className="min-h-screen bg-slate-100 lg:grid lg:grid-cols-[280px_1fr]">
+    <div className="min-h-screen bg-rc-bg lg:grid lg:grid-cols-[280px_1fr]">
       <SystemSidebar active="form" />
 
       <main className="p-6 md:p-8">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h2 className="text-3xl font-black text-slate-900">Entrada da analise</h2>
+            <h2 className="text-3xl font-black text-rc-text">Entrada da analise</h2>
             <div className="flex gap-2 flex-wrap">
               <Button variant="secondary" className="!py-2 !px-4" onClick={fillExample}>Exemplo Gluh</Button>
               <Button variant="ghost" className="!py-2 !px-4" onClick={clearForm}>Limpar</Button>
@@ -363,9 +363,9 @@ export default function App() {
 
             <div className="space-y-3">
               {input.complementaryEntities.map((entity, idx) => (
-                <div key={idx} className="border border-slate-200 bg-slate-50 rounded-2xl p-4">
+                <div key={idx} className="border border-rc-line bg-rc-surface3 rounded-xl p-4">
                   <div className="flex items-center justify-between gap-3 mb-3">
-                    <strong className="text-sm text-slate-900">Entidade complementar {idx + 1}</strong>
+                    <strong className="text-sm text-rc-text">Entidade complementar {idx + 1}</strong>
                     <span className="text-[10px] uppercase tracking-wide font-bold text-brand-700 bg-brand-50 border border-brand-100 px-2 py-1 rounded-full">
                       ate 3 analises
                     </span>
@@ -373,11 +373,11 @@ export default function App() {
 
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                     <div className="md:col-span-3 flex flex-col gap-2">
-                      <label className="text-xs font-semibold text-slate-600 ml-1">Tipo</label>
+                      <label className="text-xs font-bold text-rc-muted ml-1 uppercase tracking-wide">Tipo</label>
                       <select
                         value={entity.type}
                         onChange={e => updateEntity(idx, 'type', e.target.value)}
-                        className="w-full p-4 rounded-2xl border border-slate-200 bg-white text-slate-900 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
+                        className="w-full p-3 rounded-lg border border-rc-line bg-rc-surface text-rc-text focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none"
                       >
                         {ENTITY_TYPES.map(type => (
                           <option key={type} value={type}>{type}</option>
@@ -411,7 +411,7 @@ export default function App() {
               ))}
             </div>
 
-            <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 text-xs text-slate-600">
+            <div className="rounded-xl bg-rc-surface3 border border-rc-line p-4 text-xs text-rc-muted">
               {!hasComplementaryEntities
                 ? 'Sem entidades complementares: o diagnostico sera focado na empresa principal.'
                 : 'Com entidades complementares: o relatorio incluira leitura cruzada do ecossistema digital.'}
@@ -434,7 +434,7 @@ export default function App() {
             </div>
           </Card>
 
-          <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest text-center">
+          <p className="text-[10px] text-rc-soft uppercase font-bold tracking-widest text-center">
             Requer Google Cloud Billing para busca ativa
           </p>
         </div>
@@ -443,10 +443,10 @@ export default function App() {
   );
 
   const VitrineView = () => (
-    <div className="min-h-screen bg-slate-100 p-6 md:p-8">
+    <div className="min-h-screen bg-rc-bg p-6 md:p-8">
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900">Vitrine E.D.A • Ecossistema visual completo</h2>
+          <h2 className="text-2xl md:text-3xl font-black text-rc-text">Vitrine E.D.A • Ecossistema visual completo</h2>
           <Button variant="ghost" onClick={() => setView(AppView.LANDING)} className="!py-2 !px-4">
             Voltar
           </Button>
@@ -461,11 +461,11 @@ export default function App() {
   const ProcessingView = () => (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_#ecfdf5_0%,_#ffffff_55%)] p-6 text-center">
       <div className="relative">
-        <div className="w-24 h-24 border-4 border-slate-100 rounded-full"></div>
+      <div className="w-24 h-24 border-4 border-rc-line-soft rounded-full"></div>
         <div className="w-24 h-24 border-4 border-brand-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0 shadow-[0_0_15px_rgba(16,185,129,0.3)]"></div>
       </div>
-      <h2 className="text-xl font-bold mt-10 text-slate-900 animate-pulse">{processingStep}</h2>
-      <p className="text-sm text-slate-500 mt-2">Consolidando leitura do ecossistema digital...</p>
+      <h2 className="text-xl font-extrabold mt-10 text-rc-text animate-pulse">{processingStep}</h2>
+      <p className="text-sm text-rc-muted mt-2">Consolidando leitura do ecossistema digital...</p>
     </div>
   );
 
