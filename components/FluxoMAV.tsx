@@ -103,13 +103,13 @@ export function FluxoMAV({ companyName, context = 'vitrine', report = null }: Fl
   }, [context, report]);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-950 text-slate-100 p-4">
+    <div className="rounded-xl border border-rc-line bg-rc-surface text-rc-text p-4 shadow-[var(--shadow-soft)]">
       <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
         <div>
-          <p className="text-[11px] uppercase tracking-wider text-slate-400">E.D.A M.A.V V4</p>
-          <h4 className="text-lg font-bold">Fluxo Estratégico • {companyName || 'Empresa'}</h4>
+          <p className="text-[11px] uppercase tracking-wider text-rc-muted font-bold">E.D.A M.A.V V4</p>
+          <h4 className="text-lg font-extrabold">Fluxo Estratégico • {companyName || 'Empresa'}</h4>
         </div>
-        <div className="text-xs text-slate-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+        <div className="text-xs text-rc-muted bg-rc-surface3 border border-rc-line px-3 py-1 rounded-full font-semibold">
           {context === 'vitrine' ? 'Modo Vitrine E.D.A' : 'Modo Ecossistema da Empresa'} • {modeLabel[mode]}
         </div>
       </div>
@@ -121,8 +121,8 @@ export function FluxoMAV({ companyName, context = 'vitrine', report = null }: Fl
             onClick={() => setMode(m)}
             className={`text-xs rounded-lg px-3 py-2 border transition ${
               mode === m
-                ? 'bg-rose-600/20 border-rose-400/50 text-rose-100'
-                : 'bg-white/5 border-white/10 text-slate-200 hover:bg-white/10'
+                ? 'bg-brand-50 border-brand-300 text-brand-700'
+                : 'bg-rc-surface border-rc-line text-rc-muted hover:bg-rc-surface3'
             }`}
           >
             {modeLabel[m]}
@@ -130,7 +130,7 @@ export function FluxoMAV({ companyName, context = 'vitrine', report = null }: Fl
         ))}
       </div>
 
-      <div className="relative w-full h-[520px] rounded-xl border border-white/10 bg-[radial-gradient(circle_at_50%_30%,rgba(56,189,248,0.12),transparent_35%),radial-gradient(circle_at_50%_65%,rgba(225,29,46,0.12),transparent_35%)] overflow-hidden">
+      <div className="relative w-full h-[520px] rounded-lg border border-rc-line bg-[radial-gradient(circle_at_50%_30%,rgba(93,134,188,0.14),transparent_35%),radial-gradient(circle_at_50%_65%,rgba(47,169,156,0.12),transparent_35%)] overflow-hidden">
         <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
           {edges.map((edge, idx) => {
             const a = nodes.find((n) => n.id === edge.from);
@@ -144,7 +144,7 @@ export function FluxoMAV({ companyName, context = 'vitrine', report = null }: Fl
                 y1={a.y}
                 x2={b.x}
                 y2={b.y}
-                stroke={visible ? 'rgba(244,247,251,.65)' : 'rgba(244,247,251,.12)'}
+                stroke={visible ? 'rgba(93,104,118,.55)' : 'rgba(135,147,161,.22)'}
                 strokeWidth={0.45}
               />
             );
@@ -168,8 +168,8 @@ export function FluxoMAV({ companyName, context = 'vitrine', report = null }: Fl
               key={node.id}
               className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-xl px-3 py-2 border text-center transition ${
                 isCore
-                  ? 'bg-rose-600/25 border-rose-400/50 text-white font-bold'
-                  : 'bg-slate-900/90 border-white/15 text-slate-100'
+                  ? 'bg-brand-500 border-brand-600 text-white font-extrabold shadow-[var(--shadow-soft)]'
+                  : 'bg-rc-surface border-rc-line text-rc-text'
               } ${statusTone} ${visible ? 'opacity-100' : 'opacity-25'}`}
               style={{ left: `${node.x}%`, top: `${node.y}%` }}
             >

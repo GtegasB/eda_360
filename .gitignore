@@ -3,3 +3,6 @@ dist/
 android/.gradle/
 android/app/build/
 .env
+
+# Local Netlify folder
+.netlify

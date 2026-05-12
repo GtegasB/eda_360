@@ -11,34 +11,85 @@
           extend: {
             colors: {
               brand: {
-                50: '#ecfdf5',
-                100: '#d1fae5',
-                200: '#a7f3d0',
-                300: '#6ee7b7',
-                400: '#34d399',
-                500: '#10b981', // Verde Esmeralda Principal
-                600: '#059669',
-                700: '#047857',
-                800: '#065f46',
-                900: '#064e3b',
+                50: '#DFF3F0',
+                100: '#bfe9e3',
+                200: '#9fded6',
+                300: '#7fd4c9',
+                400: '#5fcaBC',
+                500: '#2FA99C',
+                600: '#278f84',
+                700: '#1f756d',
+                800: '#185b55',
+                900: '#11413d',
+              },
+              rc: {
+                bg: '#F2F4F6',
+                surface: '#FFFFFF',
+                surface2: '#EEF2F5',
+                surface3: '#F8FAFB',
+                line: '#D3DAE2',
+                lineSoft: '#E4E9EE',
+                text: '#303842',
+                muted: '#5D6876',
+                soft: '#8793A1',
+                blue: '#5D86BC',
+                purple: '#8C6AAE',
+                amber: '#D39A32',
+                orange: '#C9713A',
+                red: '#C85E62',
+                green: '#3E9C61'
               }
             },
             fontFamily: {
-              sans: ['Manrope', 'system-ui', 'sans-serif'],
-              display: ['Space Grotesk', 'Manrope', 'system-ui', 'sans-serif'],
+              sans: ['Rubik', 'system-ui', 'sans-serif'],
+              display: ['Rubik', 'system-ui', 'sans-serif'],
             },
             borderRadius: {
-              'xl': '1rem',
-              '2xl': '1.25rem',
-              '3xl': '1.5rem',
+              'xl': '22px',
+              '2xl': '16px',
+              '3xl': '12px',
             }
           }
         }
       }
     </script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
-      body { font-family: 'Manrope', sans-serif; background-color: #f3f4f6; color: #111827; }
+      @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap');
+
+      :root {
+        --bg: #F2F4F6;
+        --surface: #FFFFFF;
+        --surface-2: #EEF2F5;
+        --surface-3: #F8FAFB;
+        --line: #D3DAE2;
+        --line-soft: #E4E9EE;
+        --text: #303842;
+        --muted: #5D6876;
+        --soft: #8793A1;
+        --primary: #2FA99C;
+        --primary-soft: #DFF3F0;
+        --blue: #5D86BC;
+        --blue-soft: #E4EDF8;
+        --purple: #8C6AAE;
+        --purple-soft: #EEE5F5;
+        --amber: #D39A32;
+        --amber-soft: #F8ECD3;
+        --orange: #C9713A;
+        --orange-soft: #F7E4D8;
+        --red: #C85E62;
+        --red-soft: #F6DCDD;
+        --green: #3E9C61;
+        --green-soft: #E0F0E5;
+        --shadow: 0 12px 30px rgba(48, 56, 66, .07);
+        --shadow-soft: 0 8px 22px rgba(48, 56, 66, .05);
+      }
+
+      body {
+        font-family: 'Rubik', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        font-weight: 500;
+      }
       
       /* Hide scrollbar for cleaner look in some containers */
       .no-scrollbar::-webkit-scrollbar {
