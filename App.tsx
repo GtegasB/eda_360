@@ -351,29 +351,38 @@ export default function App() {
   );
 
   const FormView = () => (
-    <div className={`min-h-screen bg-rc-bg ${isPublicLite ? '' : 'lg:grid lg:grid-cols-[280px_1fr]'}`}>
+    <div className={`min-h-screen ${isPublicLite ? 'bg-gradient-to-b from-emerald-50/70 via-white to-white' : 'bg-rc-bg'} ${isPublicLite ? '' : 'lg:grid lg:grid-cols-[280px_1fr]'}`}>
       {!isPublicLite && <SystemSidebar active="form" />}
 
-      <main className="p-6 md:p-8">
-        <div className={`${isPublicLite ? 'max-w-xl' : 'max-w-6xl'} mx-auto space-y-6`}>
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h2 className="text-3xl font-black text-rc-text">
+      <main className={isPublicLite ? 'px-4 py-6 sm:px-6 md:px-8 md:py-10' : 'p-6 md:p-8'}>
+        <div className={`${isPublicLite ? 'max-w-[860px]' : 'max-w-6xl'} mx-auto space-y-6 md:space-y-8`}>
+          <div className={`flex ${isPublicLite ? 'flex-col items-start gap-4' : 'items-center justify-between gap-4 flex-wrap'}`}>
+            {isPublicLite && (
+              <span className="inline-flex items-center rounded-full border border-emerald-100 bg-white px-3 py-1 text-[11px] font-semibold tracking-wide text-emerald-700 shadow-sm">
+                EDA360
+              </span>
+            )}
+
+            <h2 className={`${isPublicLite ? 'text-[32px] leading-[1.08] sm:text-[36px] md:text-[44px] md:leading-[1.05] font-black tracking-tight max-w-3xl' : 'text-3xl'} font-black text-rc-text`}>
               {isPublicLite ? 'Descubra os gaps da sua Estrutura Digital' : 'Raio X inicial da Estrutura Digital'}
             </h2>
-            <div className="flex gap-2 flex-wrap">
-              <Button variant="secondary" className="!py-2 !px-4" onClick={fillExample}>Exemplo Gluh</Button>
-              <Button variant="ghost" className="!py-2 !px-4" onClick={clearForm}>Limpar</Button>
-            </div>
+
+            {!isPublicLite && (
+              <div className="flex gap-2 flex-wrap">
+                <Button variant="secondary" className="!py-2 !px-4" onClick={fillExample}>Exemplo Gluh</Button>
+                <Button variant="ghost" className="!py-2 !px-4" onClick={clearForm}>Limpar</Button>
+              </div>
+            )}
           </div>
 
           {isPublicLite && (
-            <p className="text-rc-muted text-base leading-relaxed">
-              Cole seu site, Instagram, Google, WhatsApp ou nome da empresa e receba uma leitura inicial da sua E.D.A.
+            <p className="text-[15px] leading-relaxed sm:text-base md:text-lg text-slate-600 max-w-3xl font-medium">
+              Cole seu Instagram, site, WhatsApp, Google ou nome da empresa e receba uma leitura inicial da sua E.D.A.
             </p>
           )}
 
-          <Card className={`space-y-6 shadow-xl border-0 ${isPublicLite ? 'p-6' : 'p-8'} relative overflow-hidden`}>
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-400 to-brand-700"></div>
+          <Card className={`space-y-6 ${isPublicLite ? 'p-5 sm:p-6 md:p-8 rounded-3xl border border-emerald-100 shadow-[0_20px_50px_rgba(15,23,42,0.08)] bg-white/95 backdrop-blur-sm' : 'shadow-xl border-0 p-8'} relative overflow-hidden`}>
+            <div className={`absolute top-0 left-0 w-full h-1 ${isPublicLite ? 'bg-gradient-to-r from-emerald-400 via-brand-500 to-teal-600' : 'bg-gradient-to-r from-brand-400 to-brand-700'}`}></div>
             {error && (
               <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex flex-col gap-2 text-red-600">
                 <div className="flex items-center gap-2 font-bold text-xs uppercase">
@@ -392,22 +401,22 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className={isPublicLite ? 'md:col-span-12' : 'md:col-span-6'}>
                 <Input
-                  label={isPublicLite ? 'Cole aqui seu ativo digital' : 'Ativo digital principal'}
-                  placeholder="Ex: @suaempresa, seusite.com.br, WhatsApp, Google ou nome da empresa"
+                  label={isPublicLite ? 'Seu ativo digital' : 'Ativo digital principal'}
+                  placeholder="Ex: @suaempresa, seusite.com.br ou nome da empresa"
                   value={input.identifier}
                   onChange={e => setInput(prev => ({ ...prev, identifier: e.target.value }))}
                   autoFocus
                 />
                 {input.identifier.trim().length > 0 && (
-                  <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-brand-100 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
                     <span>{detectedAsset.displayLabel}</span>
                     <span className="opacity-70">• confiança {detectedAsset.confidence}</span>
                   </div>
                 )}
                 {isPublicLite && (
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     {['Instagram', 'Site', 'Google', 'WhatsApp', 'Nome da empresa'].map((chip) => (
-                      <span key={chip} className="text-[11px] font-semibold text-rc-muted bg-rc-surface3 border border-rc-line px-3 py-1 rounded-full">
+                      <span key={chip} className="text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full">
                         {chip}
                       </span>
                     ))}
@@ -435,26 +444,26 @@ export default function App() {
                 </>
               )}
 
-              <div className={isPublicLite ? 'md:col-span-12' : 'md:col-span-6'}>
+              {!isPublicLite && <div className={'md:col-span-6'}>
                 <div className="rounded-xl border border-dashed border-rc-line bg-rc-surface3 p-3 text-xs text-rc-muted">
                   Dica: você pode informar Instagram, site, Google, WhatsApp ou nome da empresa no campo principal.
                 </div>
-              </div>
+              </div>}
 
               {isPublicLite ? (
                 <div className="md:col-span-12">
                   <button
                     type="button"
                     onClick={() => setShowOptionalFields((prev) => !prev)}
-                    className="w-full flex items-center justify-between rounded-xl border border-rc-line bg-rc-surface px-4 py-3 text-sm font-semibold text-rc-text"
+                    className="w-full flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-700"
                   >
                     <span>Adicionar informações opcionais</span>
                     {showOptionalFields ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
 
                   {showOptionalFields && (
-                    <div className="mt-3 grid grid-cols-1 gap-3">
-                      <p className="text-xs text-rc-muted">
+                    <div className="mt-3 grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+                      <p className="text-xs text-slate-500">
                         Essas informações ajudam a deixar a leitura mais precisa, mas não são obrigatórias.
                       </p>
                       <Input
@@ -556,15 +565,21 @@ export default function App() {
               >
                 <Plus className="w-4 h-4" /> Adicionar entidade
               </Button>}
-              <Button onClick={handleRunDiagnosis} className="!py-3 flex-1 min-w-[220px]">
+              <Button onClick={handleRunDiagnosis} className={`${isPublicLite ? '!py-4 text-base shadow-md shadow-emerald-700/20' : '!py-3'} flex-1 min-w-[220px]`}>
                 {isPublicLite ? 'Analisar minha E.D.A.' : 'Analisar E.D.A'}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
+
+            {isPublicLite && (
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Leitura inicial baseada nos sinais digitais disponíveis.
+              </p>
+            )}
           </Card>
 
-          <p className="text-[10px] text-rc-soft uppercase font-bold tracking-widest text-center">
-            Pré-diagnóstico inicial com IA • não substitui análise consultiva completa
+          <p className={`${isPublicLite ? 'text-[11px] text-slate-500 font-medium tracking-normal' : 'text-[10px] text-rc-soft uppercase font-bold tracking-widest'} text-center`}>
+            Pré-diagnóstico inicial com IA. Não substitui uma análise consultiva completa.
           </p>
         </div>
       </main>
