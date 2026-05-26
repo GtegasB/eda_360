@@ -4,7 +4,8 @@ export enum AppView {
   VITRINE = 'VITRINE',
   FORM = 'FORM',
   PROCESSING = 'PROCESSING',
-  REPORT = 'REPORT'
+  REPORT = 'REPORT',
+  HISTORY = 'HISTORY'
 }
 
 export interface ComplementaryEntityInput {
@@ -15,11 +16,27 @@ export interface ComplementaryEntityInput {
 
 export interface CompanyInput {
   identifier: string;
+  initialChannel?: string;
   cityUF?: string;
   segment?: string;
   site?: string;
   strategicNote?: string;
   complementaryEntities: ComplementaryEntityInput[];
+}
+
+export type EvidenceOrigin = "informado" | "inferido_ia" | "provavel" | "confirmacao_manual";
+
+export interface ChannelEvidence {
+  canal: string;
+  tipo: string;
+  url?: string;
+  status: "encontrado" | "ausente" | "desconectado";
+  forca: number;
+  fragilidade: string;
+  evidencia: string;
+  recomendacao: string;
+  confianca: number;
+  origem: EvidenceOrigin;
 }
 
 export interface ChannelData {
@@ -108,6 +125,11 @@ export interface IdentifiedCompany {
 }
 
 export interface EDAReport {
+  analysisId?: string;
+  analysisStatus?: "completed" | "partial" | "error";
+  analysisSource?: "deepseek" | "gemini" | "fallback";
+  diagnosticVersion?: string;
+  confidenceScore?: number;
   identidadeProduto: {
     nomeInstitucional: string;
     metodologia: string;
@@ -136,4 +158,7 @@ export interface EDAReport {
   };
   dataGeracao: string;
   sources?: { title: string; uri: string }[];
+  evidenciasCanais?: ChannelEvidence[];
+  riscos?: string[];
+  oportunidades?: string[];
 }

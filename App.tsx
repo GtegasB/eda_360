@@ -1,6 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { AppView, CompanyInput, ComplementaryEntityInput, EDAReport } from './types';
-import { analyzeCompany } from './services/geminiService';
+import { runDiagnostic } from './services/diagnosticApi';
+import { diagnosticRepository } from './services/diagnosticRepositoryProvider';
+import { StoredDiagnostic } from './services/diagnostic.types';
+import { computeScoreBreakdown } from './utils/score.utils';
+import { submitEda360Lead } from './services/leadApi';
 import { Button, Card, Input, MacroTitle, MesoText, MicroLabel, Badge } from './components/UI';
 import { RadarNetwork } from './components/RadarNetwork';
 import { FluxoMAV } from './components/FluxoMAV';
@@ -21,7 +25,8 @@ import {
   Plus,
   Trash2,
   Clipboard,
-  Workflow
+  Workflow,
+  History
 } from 'lucide-react';
 
 const MAX_COMPLEMENTARY_ENTITIES = 3;
@@ -98,6 +103,8 @@ export default function App() {
   const [report, setReport] = useState<EDAReport | null>(null);
   const [processingStep, setProcessingStep] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<StoredDiagnostic[]>([]);
+  const [leadMessage, setLeadMessage] = useState<string | null>(null);
 
   const sanitizeInput = (val: string) => {
     const cleaned = val.trim();
@@ -132,6 +139,11 @@ export default function App() {
       complementaryEntities: [createEmptyEntity()]
     });
     setError(null);
+  };
+
+  const refreshHistory = async () => {
+    const items = await diagnosticRepository.list();
+    setHistory(items);
   };
 
   const fillExample = () => {
@@ -212,8 +224,10 @@ export default function App() {
     };
 
     try {
-      const result = await analyzeCompany(sanitizedInput);
+      const result = await runDiagnostic(sanitizedInput);
       setReport(result);
+      await diagnosticRepository.save(result);
+      await refreshHistory();
       clearInterval(interval);
       setView(AppView.REPORT);
     } catch (err: unknown) {
@@ -458,6 +472,46 @@ export default function App() {
     </div>
   );
 
+  const HistoryView = () => (
+    <div className="min-h-screen bg-rc-bg lg:grid lg:grid-cols-[280px_1fr]">
+      <SystemSidebar active="report" />
+      <main className="p-6 md:p-8">
+        <div className="max-w-6xl mx-auto space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl md:text-3xl font-black text-rc-text">Historico de diagnosticos</h2>
+            <Button variant="ghost" onClick={() => setView(AppView.LANDING)} className="!py-2 !px-4">Voltar</Button>
+          </div>
+          <Card className="border-0 shadow-sm">
+            {history.length === 0 ? (
+              <p className="text-sm text-rc-muted">Nenhum diagnostico salvo localmente.</p>
+            ) : (
+              <div className="space-y-3">
+                {history.map((item) => (
+                  <div key={item.id} className="p-4 rounded-xl border border-rc-line bg-rc-surface3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-rc-text">{item.companyName}</p>
+                      <p className="text-xs text-rc-muted">{item.createdAt} • score {item.score}/100 • {item.maturityLevel} • {item.status} • {item.storage}</p>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      className="!py-2 !px-3"
+                      onClick={() => {
+                        setReport(item.report);
+                        setView(AppView.REPORT);
+                      }}
+                    >
+                      Abrir
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
+
   const ProcessingView = () => (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_#ecfdf5_0%,_#ffffff_55%)] p-6 text-center">
       <div className="relative">
@@ -478,6 +532,7 @@ export default function App() {
     const companySegment = report.empresaPrincipal.segmento || 'Nao identificado';
 
     const rows = derivePillarRows(report.pilares);
+    const score = computeScoreBreakdown(report);
     const strong = rows.filter(row => row.status === 'forte').length;
     const partial = rows.filter(row => row.status === 'parcial').length;
     const absent = rows.filter(row => row.status === 'ausente').length;
@@ -506,6 +561,37 @@ export default function App() {
       }
     };
 
+    const handleCommercialLead = async () => {
+      const contactName = window.prompt('Nome do responsável (opcional):') || undefined;
+      const phone = window.prompt('WhatsApp/Telefone (obrigatório se não houver email):') || undefined;
+      const email = window.prompt('E-mail (obrigatório se não houver telefone):') || undefined;
+
+      if (!phone && !email) {
+        setLeadMessage('Informe telefone ou e-mail para registrar o interesse comercial.');
+        return;
+      }
+
+      const result = await submitEda360Lead({
+        diagnosticId: report.analysisId,
+        companyName,
+        contactName,
+        email,
+        phone,
+        preferredChannel: phone ? 'whatsapp' : 'email',
+        ctaOrigin: 'report_final',
+        ctaLabel: 'Quero organizar minha E.D.A.',
+        scoreGeneral: score.score100,
+        maturityLevel: score.maturityLevel,
+        notes: 'Lead originado pelo CTA do relatório EDA360',
+      });
+
+      setLeadMessage(
+        result.mode === 'supabase'
+          ? 'Interesse comercial registrado no Supabase. Equipe poderá prosseguir com contato consultivo.'
+          : 'Supabase indisponível. Interesse registrado em fallback local para não perder o lead.'
+      );
+    };
+
     return (
       <div className="min-h-screen bg-slate-100 lg:grid lg:grid-cols-[280px_1fr]">
         <SystemSidebar active="report" />
@@ -524,6 +610,7 @@ export default function App() {
               </div>
               <div className="flex gap-2 flex-wrap">
                 <Button variant="secondary" className="!py-2 !px-4" onClick={() => setView(AppView.FORM)}>Nova analise</Button>
+                <Button variant="ghost" className="!py-2 !px-4" onClick={async () => { await refreshHistory(); setView(AppView.HISTORY); }}><History className="w-4 h-4" /></Button>
                 <Button variant="ghost" className="!py-2 !px-4" onClick={copySummary}><Clipboard className="w-4 h-4" /></Button>
                 <Button variant="ghost" className="!py-2 !px-4" onClick={handlePrint}><Download className="w-4 h-4" /></Button>
               </div>
@@ -549,7 +636,7 @@ export default function App() {
             <section className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="!p-5 border-0 shadow-sm text-center">
                 <small className="text-[11px] uppercase tracking-wider text-slate-400">Nota geral</small>
-                <div className={`text-5xl font-black mt-2 ${scoreTone(report.notaGeralEDA)}`}>{report.notaGeralEDA}</div>
+                <div className={`text-5xl font-black mt-2 ${scoreTone(report.notaGeralEDA)}`}>{score.score100}</div>
                 <p className="text-xs text-slate-500 mt-2">Maturidade estrutural da E.D.A</p>
               </Card>
               <Card className="!p-5 border-0 shadow-sm text-center">
@@ -574,6 +661,27 @@ export default function App() {
               <div className="p-4 rounded-xl bg-brand-50 border-l-4 border-brand-500 text-sm text-slate-700 leading-relaxed">
                 <strong>{report.recomendacaoComercial.nivelProntidao}</strong> prontidao de ecossistema. {report.recomendacaoComercial.aberturaSessaoEstrategica}
                 {' '}Direcao sugerida: {report.recomendacaoComercial.proximoPasso}
+              </div>
+              <p className="mt-3 text-sm text-slate-600">{score.explanation}</p>
+              <div className="mt-2 text-xs text-slate-500">Nível de maturidade: <strong>{score.maturityLevel}</strong></div>
+              <div className="mt-3 text-xs text-slate-600">
+                Confianca da analise: <strong>{report.confidenceScore ?? 50}%</strong> • Origem: <strong>{report.analysisSource || 'nao informado'}</strong>
+              </div>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 mb-3">Evidencias por canal</h3>
+              <div className="space-y-2">
+                {(report.evidenciasCanais || []).map((ev, idx) => (
+                  <div key={idx} className="p-3 rounded-lg border border-slate-100 bg-slate-50 text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <strong>{ev.canal}</strong>
+                      <span className="text-xs">{ev.status} • confianca {ev.confianca}%</span>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-1">Evidencia: {ev.evidencia}</p>
+                    <p className="text-xs text-slate-600">Recomendacao: {ev.recomendacao}</p>
+                  </div>
+                ))}
               </div>
             </Card>
 
@@ -721,9 +829,13 @@ export default function App() {
             </section>
 
             <div className="text-center pt-4 no-print pb-16">
-              <Button className="mx-auto w-full md:w-auto text-base px-10 py-5">
+              <Button
+                className="mx-auto w-full md:w-auto text-base px-10 py-5"
+                onClick={handleCommercialLead}
+              >
                 <Target className="w-4 h-4" /> Agendar Sessao Estrategica E.D.A
               </Button>
+              {leadMessage && <p className="mt-3 text-xs text-slate-600">{leadMessage}</p>}
               <MesoText className="mt-3 text-xs text-slate-500">
                 O EDA360 e a porta de entrada gratuita para implantacao completa da metodologia.
               </MesoText>
@@ -741,6 +853,7 @@ export default function App() {
       {view === AppView.FORM && <FormView />}
       {view === AppView.PROCESSING && <ProcessingView />}
       {view === AppView.REPORT && <ReportView />}
+      {view === AppView.HISTORY && <HistoryView />}
     </>
   );
 }

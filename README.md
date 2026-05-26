@@ -45,6 +45,24 @@ Com isso, o app apoia:
 
 1. Instale as dependencias:
    `npm install`
-2. Defina `GEMINI_API_KEY` em `.env.local`
+2. Defina as chaves de API em `.env`:
+   - `DEEPSEEK_API_KEY` — motor principal da varredura
+   - `GEMINI_API_KEY` — fallback com Google Search grounding
 3. Rode a aplicacao:
    `npm run dev`
+
+## Arquitetura dos Motores de IA
+
+A varredura EDA360 usa dois motores em cascata:
+
+1. **DeepSeek** (primário) — [`services/deepseekService.ts`](services/deepseekService.ts)
+   - API compatível com OpenAI em `https://api.deepseek.com/v1/chat/completions`
+   - Modelo: `deepseek-chat`
+   - Retorno em `response_format: { type: "json_object" }`
+
+2. **Gemini** (fallback) — [`services/geminiService.ts`](services/geminiService.ts)
+   - Usado quando DeepSeek falha
+   - Modelo: `gemini-3-pro-preview`
+   - Conta com Google Search grounding para validação de dados reais
+
+O orquestrador está em [`services/analyzeService.ts`](services/analyzeService.ts). O utilitário de normalização comum está em [`services/normalizeReport.ts`](services/normalizeReport.ts).

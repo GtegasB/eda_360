@@ -1,27 +1,22 @@
-import { GoogleGenAI, GroundingChunk } from "@google/genai";
 import { CompanyInput, EDA_PILLARS, EDAReport } from "../types";
 import { normalizeReport, extractJson, buildComplementaryBlock } from "./normalizeReport";
 
-/**
- * Motor de análise via Gemini com Google Search grounding.
- * Mantido como fallback do DeepSeek.
- */
-export const analyzeWithGemini = async (input: CompanyInput): Promise<EDAReport> => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("Gemini API Key missing");
+const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 
-  const ai = new GoogleGenAI({ apiKey });
-
-  const complementaryBlock = buildComplementaryBlock(input.complementaryEntities);
-
-  const prompt = `
-Você é o Motor de Inteligência EDA360 do Centro de Inteligência Digital (GrupoB).
+const SYSTEM_PROMPT = `Você é o Motor de Inteligência EDA360 do Centro de Inteligência Digital (GrupoB).
 
 HIERARQUIA DO PRODUTO:
 1) Centro de Inteligência Digital (institucional guarda-chuva)
 2) E.D.A - Estrutura Digital Avançada (metodologia)
 3) EDA360 (aplicativo gratuito de análise, porta de entrada da metodologia)
 
+Você recebe dados de uma empresa e analisa sua maturidade digital com base nos 19 pilares da E.D.A.
+Sempre retorne EXCLUSIVAMENTE JSON válido, sem markdown, sem blocos de código, sem texto fora do JSON.`;
+
+const buildUserPrompt = (input: CompanyInput): string => {
+  const complementaryBlock = buildComplementaryBlock(input.complementaryEntities);
+
+  return `
 ENTRADA PRINCIPAL: "${input.identifier}"
 CONTEXTO INFORMADO:
 - Cidade/UF: "${input.cityUF || "Nao informado"}"
@@ -33,8 +28,6 @@ ENTIDADES COMPLEMENTARES (até 3):
 ${complementaryBlock}
 
 INSTRUÇÕES:
-- Use Google Search para validar dados reais e sinais digitais.
-- Entenda o EDA360 como ferramenta de percepção de valor, qualificação inicial e abertura para sessão estratégica.
 - Analise empresa principal e relacione entidades complementares ao ecossistema digital.
 - Avalie os 19 pilares da E.D.A com nota de 0 a 10 e ação prioritária (Criar, Ajustar ou Fortalecer).
 - Gere uma nota geral E.D.A de 0 a 10.
@@ -125,41 +118,43 @@ RETORNE EXCLUSIVAMENTE JSON (sem markdown, sem texto fora do JSON) no formato:
   },
   "dataGeracao": "string ISO"
 }`;
+};
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: prompt,
-      config: {
-        tools: [{ googleSearch: {} }],
-        temperature: 0.2,
-      }
-    });
+export const analyzeWithDeepSeek = async (input: CompanyInput): Promise<EDAReport> => {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) throw new Error("DEEPSEEK_API_KEY não configurada");
 
-    const text = response.text;
-    if (!text) throw new Error("Gemini retornou resposta vazia");
+  const response = await fetch(DEEPSEEK_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: "deepseek-chat",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: buildUserPrompt(input) }
+      ],
+      temperature: 0.2,
+      response_format: { type: "json_object" }
+    })
+  });
 
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
-      ?.map((chunk: GroundingChunk) => chunk.web)
-      ?.filter(Boolean)
-      ?.map((web) => ({
-        title: web.title,
-        uri: web.uri
-      })) || [];
-
-    const cleanJson = extractJson(text);
-    const raw = JSON.parse(cleanJson);
-    const report = normalizeReport(raw, input.identifier);
-    report.sources = sources;
-    return report;
-  } catch (error: unknown) {
-    console.error("Erro na análise Gemini:", error);
-
-    const errorMessage = error instanceof Error ? error.message : String(error || "");
-    if (errorMessage.toLowerCase().includes("404") || errorMessage.toLowerCase().includes("not found")) {
-      throw new Error("API_KEY_RESOURCE_NOT_FOUND");
-    }
-
-    throw error;
+  if (!response.ok) {
+    const errBody = await response.text().catch(() => "");
+    throw new Error(`DeepSeek API error ${response.status}: ${errBody}`);
   }
+
+  const data = await response.json();
+  const content: string = data.choices?.[0]?.message?.content;
+
+  if (!content) throw new Error("DeepSeek retornou resposta vazia");
+
+  const cleanJson = extractJson(content);
+  const raw = JSON.parse(cleanJson);
+  const report = normalizeReport(raw, input.identifier);
+  report.dataGeracao = new Date().toISOString();
+
+  return report;
 };
