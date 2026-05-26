@@ -4,5 +4,8 @@ android/.gradle/
 android/app/build/
 .env
 
+# Arquivo local com chaves (não versionar)
+docs/Chaves Netlify
+
 # Local Netlify folder
 .netlify
