@@ -27,6 +27,20 @@ const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 const buildPrompt = (input: z.infer<typeof inputSchema>) => {
   const complementaryBlock = buildComplementaryBlock(input.complementaryEntities);
   return `
+CONTEXTO DO PRODUTO:
+- Você está gerando um PRÉ-DIAGNÓSTICO comercial da Estrutura Digital (E.D.A.), não uma consultoria completa.
+- Objetivo: gerar consciência de gaps e orientar próximo passo consultivo com a 3forB.
+
+REGRAS DE RESPOSTA:
+- Linguagem consultiva e objetiva.
+- Tratar achados como "sinais identificados", "pontos de atenção" e "gaps".
+- Evitar plano detalhado de execução, passo a passo operacional, playbook completo ou solução pronta.
+- Sugerir impactos comerciais de forma geral (ex: perda de confiança, menor conversão, baixa encontrabilidade).
+- Manter as recomendações em nível estratégico e inicial.
+- Deixar claro que é uma leitura inicial.
+- Não afirmar dados internos da empresa sem evidência pública.
+- Limitar recomendações profundas e operacionais.
+
 ENTRADA PRINCIPAL: "${input.identifier}"
 CANAL INICIAL: "${input.initialChannel || "Nao informado"}"
 CONTEXTO INFORMADO:
@@ -40,6 +54,11 @@ ${complementaryBlock}
 
 PILARES OBRIGATÓRIOS:
 ${EDA_PILLARS.map((pillar, idx) => `${idx + 1}. ${pillar}`).join("\n")}
+
+FORMATO ESPERADO:
+- incluir nota geral E.D.A (0 a 10), nível de maturidade, leitura inicial, principais gaps, possíveis impactos e próximo passo consultivo.
+- Não entregar roteiro completo de implementação.
+- Priorizar resposta útil para relatório público enxuto.
 
 RETORNE EXCLUSIVAMENTE JSON.`;
 };
@@ -99,7 +118,7 @@ const analyzeWithGemini = async (input: z.infer<typeof inputSchema>) => {
   const sources =
     response.candidates?.[0]?.groundingMetadata?.groundingChunks
       ?.map((chunk: GroundingChunk) => chunk.web)
-      ?.filter(Boolean)
+      ?.filter((web): web is { title: string; uri: string } => Boolean(web?.title && web?.uri))
       ?.map((web) => ({ title: web.title, uri: web.uri })) || [];
 
   const raw = JSON.parse(extractJson(text));
@@ -136,4 +155,3 @@ export const handler: Handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: message }) };
   }
 };
-
